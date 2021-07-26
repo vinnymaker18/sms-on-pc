@@ -92,5 +92,13 @@ func main() {
 		}
 	})
 
+	go func() {
+		fmt.Println("delete old sms goroutine initiated")
+		for {
+			storage.DeleteOldSMS()
+			time.Sleep(time.Hour)
+		}
+	}()
+
 	http.ListenAndServe(":8000", nil)
 }
