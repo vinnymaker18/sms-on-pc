@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-    "strings"
+	"strings"
 	"time"
 
 	"github.com/vinnymaker18/sms-on-pc/backend/common"
@@ -17,7 +17,7 @@ const (
 
 	deleteOldSmsQuery = "DELETE FROM sms WHERE msg_time < $1"
 
-	markSmsQuery = "UPDATE sms SET seen = 't' WHERE sms_id in $1"
+	markSmsQuery = "UPDATE sms SET seen = 't' WHERE sms_id in "
 )
 
 // StoreNewSMS persists a new SMS in the database.
@@ -81,13 +81,13 @@ func FetchNewSMS(userID int64) []*common.SMSMessage {
 }
 
 func listifyIDs(ids []int64) string {
-    var builder strings.Builder
-    builder.WriteString("(")
-    for _, id := range ids {
-        builder.WriteString(fmt.Sprintf("%d,", id))
-    }
-    builder.WriteString("-1)")
-    return builder.String()
+	var builder strings.Builder
+	builder.WriteString("(")
+	for _, id := range ids {
+		builder.WriteString(fmt.Sprintf("%d,", id))
+	}
+	builder.WriteString("-1)")
+	return builder.String()
 }
 
 // MarkAsRead marks the given message ids as read in the database.
@@ -99,7 +99,8 @@ func MarkAsRead(msgIDs []int64) error {
 	}
 	defer conn.Release()
 
-	_, err = conn.Query(context.Background(), markSmsQuery, listifyIDs(msgIDs))
+	query := markSmsQuery + listifyIDs(msgIDs)
+	_, err = conn.Query(context.Background(), query)
 	return err
 }
 
