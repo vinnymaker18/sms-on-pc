@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	newSmsFetchQuery = "SELECT msg_time, origin, body, msg_id FROM sms WHERE user_id = $1 AND NOT seen"
+	newSmsFetchQuery = "SELECT msg_time, origin, body, sms_id FROM sms WHERE user_id = $1 AND NOT seen"
 
 	newSmsStoreQuery = "INSERT INTO sms (user_id, msg_time, origin, body) VALUES ($1, $2, $3, $4)"
 
 	deleteOldSmsQuery = "DELETE FROM sms WHERE msg_time < $1"
 
-	markSmsQuery = "UPDATE sms SET seen = 1 WHERE msg_id in $1"
+	markSmsQuery = "UPDATE sms SET seen = 1 WHERE sms_id in $1"
 )
 
 // StoreNewSMS persists a new SMS in the database.
