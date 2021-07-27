@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+    "os"
 	"github.com/vinnymaker18/sms-on-pc/backend/common"
 	"github.com/vinnymaker18/sms-on-pc/backend/storage"
 )
@@ -95,18 +96,23 @@ func parseMessageIDs(req *http.Request) ([]int64, error) {
 		msgIDs = append(msgIDs, parsed)
 	}
 
+    fmt.Printf("%v\n", msgIDs)
 	return msgIDs, nil
 }
 
 func markSmsHandler(w http.ResponseWriter, req *http.Request) {
 	msgIDs, err := parseMessageIDs(req)
 	if err != nil {
+        fmt.Fprintln(os.Stderr, "Invalid syntax for message Ids")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte{})
 		return
 	}
 
-	storage.MarkAsRead(msgIDs)
+    err = storage.MarkAsRead(msgIDs)
+    if err != nil {
+        fmt.Fprintln(os.Stderr, err.Error())
+    }
 }
 
 func main() {
@@ -115,7 +121,8 @@ func main() {
 		req.ParseForm()
 
 		if req.Method == http.MethodPost {
-			markSmsHandler(w, req)
+            fmt.Fprintln(os.Stderr, "/sms/mark post request received")
+            markSmsHandler(w, req)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte{})
