@@ -1,0 +1,17 @@
+{
+  "name": "SMS on PC",
+  "description": "Check your SMS right from your PC/workstation",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "alarms",
+    "storage",
+    "notifications"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
