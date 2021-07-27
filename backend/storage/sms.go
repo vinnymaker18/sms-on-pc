@@ -17,7 +17,7 @@ const (
 
 	deleteOldSmsQuery = "DELETE FROM sms WHERE msg_time < $1"
 
-	markSmsQuery = "UPDATE sms SET seen = 'f' WHERE sms_id in $1"
+	markSmsQuery = "UPDATE sms SET seen = 't' WHERE sms_id in $1"
 )
 
 // StoreNewSMS persists a new SMS in the database.
