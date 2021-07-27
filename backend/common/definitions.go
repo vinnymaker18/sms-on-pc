@@ -8,4 +8,5 @@ type SMSMessage = struct {
 	Time          time.Time
 	OriginAddress string
 	MsgBody       string
+	MsgID         int64
 }

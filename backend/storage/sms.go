@@ -10,11 +10,13 @@ import (
 )
 
 const (
-	newSmsFetchQuery = "SELECT msg_time, origin, body FROM sms WHERE user_id = $1 AND NOT seen"
+	newSmsFetchQuery = "SELECT msg_time, origin, body, msg_id FROM sms WHERE user_id = $1 AND NOT seen"
 
 	newSmsStoreQuery = "INSERT INTO sms (user_id, msg_time, origin, body) VALUES ($1, $2, $3, $4)"
 
 	deleteOldSmsQuery = "DELETE FROM sms WHERE msg_time < $1"
+
+	markSmsQuery = "UPDATE sms SET seen = 1 WHERE msg_id in $1"
 )
 
 // StoreNewSMS persists a new SMS in the database.
@@ -58,7 +60,8 @@ func FetchNewSMS(userID int64) []*common.SMSMessage {
 		var msgTime time.Time
 		var originAddress string
 		var msgBody string
-		err = rows.Scan(&msgTime, &originAddress, &msgBody)
+		var msgID int64
+		err = rows.Scan(&msgTime, &originAddress, &msgBody, &msgID)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error parsing returned database row"+err.Error())
 			return []*common.SMSMessage{}
@@ -69,10 +72,24 @@ func FetchNewSMS(userID int64) []*common.SMSMessage {
 			Time:          msgTime,
 			MsgBody:       msgBody,
 			OriginAddress: originAddress,
+			MsgID:         msgID,
 		})
 	}
 
 	return messages
+}
+
+// MarkAsRead marks the given message ids as read in the database.
+func MarkAsRead(msgIDs []int64) error {
+	conn, err := newDBConn()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error connecting to database"+err.Error())
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Query(context.Background(), markSmsQuery, msgIDs)
+	return err
 }
 
 // DeleteOldSMS deletes old sms messages from the database.

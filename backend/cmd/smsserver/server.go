@@ -80,7 +80,48 @@ func smsWriteHandler(w http.ResponseWriter, req *http.Request) {
 	storage.StoreNewSMS(newTextMsg)
 }
 
+func parseMessageIDs(req *http.Request) ([]int64, error) {
+	msgIDParams, ok := req.Form["msgids"]
+	if !ok {
+		return nil, fmt.Errorf("No msgids parameter in the request")
+	}
+
+	msgIDs := make([]int64, 0)
+	for _, id := range msgIDParams {
+		parsed, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid msg id parameter")
+		}
+		msgIDs = append(msgIDs, parsed)
+	}
+
+	return msgIDs, nil
+}
+
+func markSmsHandler(w http.ResponseWriter, req *http.Request) {
+	msgIDs, err := parseMessageIDs(req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte{})
+		return
+	}
+
+	storage.MarkAsRead(msgIDs)
+}
+
 func main() {
+	http.HandleFunc("/sms/mark", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set(contentTypeHeader, jsonContentType)
+		req.ParseForm()
+
+		if req.Method == http.MethodPost {
+			markSmsHandler(w, req)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte{})
+		}
+	})
+
 	http.HandleFunc("/sms", func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set(contentTypeHeader, jsonContentType)
 		req.ParseForm()
