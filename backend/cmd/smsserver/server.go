@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -83,10 +84,14 @@ func smsWriteHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func parseMessageIDs(req *http.Request) ([]int64, error) {
-	msgIDParams, ok := req.Form["msgids"]
-	if !ok {
-		return nil, fmt.Errorf("No msgids parameter in the request")
+	databytes, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
 	}
+
+	var reqBody map[string][]int64
+	json.NewDecoder(req.Body).Decode(&reqBody)
+	msgIDParams := reqBody["msgids"]
 
 	msgIDs := make([]int64, 0)
 	for _, id := range msgIDParams {
