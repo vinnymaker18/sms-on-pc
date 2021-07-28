@@ -1,13 +1,27 @@
+const SERVER_ROOT = "https://minibox.vinayemani.xyz/";
+
 function fetchNewSMS(userID) {
-  // TODO - Implement this.
-  fetch("https://minibox.vinayemani.xyz/sms?userid="+userID)
+  fetch(SERVER_ROOT + "sms?userid="+userID)
     .then(resp => {
       return resp.json();
     })
     .then(data => {
+      let msgIDs = [];
       for (var sms of data) {
+        msgIDs[msgIDs.length] = sms.MsgID;
         sendNotification(sms);
       }
+
+      // send a post request marking these smses as read.
+      fetch(SERVER_ROOT + "sms/mark", {
+        method: "POST",
+        body: JSON.stringify({msgids: msgIDs})
+      }).then(resp => {
+        return resp.json();
+      }).then(_ => {
+      }).catch(err => {
+        console.log(err);
+      });
     })
     .catch(err => {
       console.log(err);
