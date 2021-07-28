@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -84,26 +83,12 @@ func smsWriteHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func parseMessageIDs(req *http.Request) ([]int64, error) {
-	databytes, err := ioutil.ReadAll(req.Body)
+	var reqBody map[string][]int64
+	err := json.NewDecoder(req.Body).Decode(&reqBody)
 	if err != nil {
 		return nil, err
 	}
-
-	var reqBody map[string][]int64
-	json.NewDecoder(req.Body).Decode(&reqBody)
-	msgIDParams := reqBody["msgids"]
-
-	msgIDs := make([]int64, 0)
-	for _, id := range msgIDParams {
-		parsed, err := strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("Invalid msg id parameter")
-		}
-		msgIDs = append(msgIDs, parsed)
-	}
-
-	fmt.Printf("%v\n", msgIDs)
-	return msgIDs, nil
+	return reqBody["msgids"], nil
 }
 
 func markSmsHandler(w http.ResponseWriter, req *http.Request) {
