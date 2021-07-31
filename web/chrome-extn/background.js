@@ -13,15 +13,17 @@ function fetchNewSMS(userID) {
       }
 
       // send a post request marking these smses as read.
-      fetch(SERVER_ROOT + "sms/mark", {
-        method: "POST",
-        body: JSON.stringify({msgids: msgIDs})
-      }).then(resp => {
-        return resp.json();
-      }).then(_ => {
-      }).catch(err => {
-        console.log(err);
-      });
+      if (msgIDs.length > 0) {
+        fetch(SERVER_ROOT + "sms/mark", {
+          method: "POST",
+          body: JSON.stringify({msgids: msgIDs})
+        }).then(resp => {
+          return resp.json();
+        }).then(_ => {
+        }).catch(err => {
+          console.log(err);
+        });
+      }
     })
     .catch(err => {
       console.log(err);
